@@ -1,0 +1,32 @@
+:root {
+  --color-brand--1: #ffb545;
+  --color-brand--2: #00c46a;
+}
+
+body {
+  background-color: #fff;
+}
+
+.workout {
+  background-color: var(--color-dark--2);
+}
+
+/* MAP */
+#map {
+  height: 90vh;
+  background-color: #aaa;
+}
+
+.container-map {
+  text-align: center;
+}
+
+.container__Search {
+  position: fixed;
+  width: 100%;
+  bottom: 10px;
+}
+
+.hidden {
+  display: none;
+}
