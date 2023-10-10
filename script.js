@@ -73,8 +73,6 @@ class App {
   }
 
   _place(e) {
-    e.preventDefault();
-
     //Get input from user
     const placeName = inputPlace.value;
 
