@@ -10,11 +10,12 @@ class Place {
   }
 }
 
-const searchBox = document.querySelector('.search__contaienr');
-const form = document.querySelector('.search');
-const inputPlace = document.querySelector('.input__place');
-
 class App {
+  #form = document.querySelector('.search');
+  #searchBox = document.querySelector('.search__contaienr');
+  #inputPlace = document.querySelector('.input__place');
+  #overlay = document.querySelector('.overlay');
+  #btnCancle = document.querySelector('.btn-cancle');
   #map;
   #mapZoomLevel = 12;
   #mapEvent;
@@ -28,27 +29,25 @@ class App {
     // Get data from local storage
 
     // Attach event handlers
-    form.addEventListener('submit', this._place.bind(this));
+    this.#form.addEventListener('submit', this._place.bind(this));
+    // this.#searchBox.addEventListener('click', this._hideForm.bind(this));
+    this.#btnCancle.addEventListener('click', this._hideForm.bind(this));
   }
 
-  _getPosition() {
-    if (navigator.geolocation)
-      navigator.geolocation.getCurrentPosition(
-        this._loadMap.bind(this),
-        function () {
-          alert('Could not get your position');
-        }
-      );
+  async _getPosition() {
+    const data = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+    if (!data) return;
+    this._loadMap(data);
   }
 
   _loadMap(position) {
-    const { latitude } = position.coords;
-    const { longitude } = position.coords;
-    const coords = [latitude, longitude];
+    const { latitude: lat, longitude: lng } = position.coords;
 
-    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
+    this.#map = L.map('map').setView([lat, lng], this.#mapZoomLevel);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.#map);
@@ -63,19 +62,23 @@ class App {
 
   _showForm(mapE) {
     this.#mapEvent = mapE;
-    searchBox.classList.remove('hidden');
-    inputPlace.focus();
+    this.#searchBox.classList.remove('hidden');
+    this.#overlay.classList.remove('hidden');
+    this.#inputPlace.focus();
   }
 
   _hideForm() {
-    searchBox.classList.add('hidden');
-    inputPlace.value = '';
+    this.#searchBox.classList.add('hidden');
+    this.#overlay.classList.add('hidden');
+    this.#inputPlace.value = '';
   }
 
   _place(e) {
+    e.preventDefault();
     //Get input from user
-    const placeName = inputPlace.value;
 
+    const placeName = this.#inputPlace.value;
+    if (!placeName) return;
     console.log(placeName);
     const { lat, lng } = this.#mapEvent.latlng;
 
@@ -99,9 +102,11 @@ class App {
       .addTo(this.#map)
       .bindPopup(
         L.popup({
-          maxWidth: 10,
+          maxwidth: 100,
+          minwidth: 70,
           autoClose: false,
           closeOnClick: false,
+          className: `task-popup`,
         })
       )
       .setPopupContent(`<h6>${workout.placeName}</h6>`)
@@ -118,11 +123,11 @@ class App {
     if (!data) return;
 
     this.#workouts = data;
-
-    this.#workouts.forEach(work => {
-      this._place(work)
-    });
+  }
+  clear() {
+    localStorage.clear();
   }
 }
 
 const app = new App();
+app.clear();
